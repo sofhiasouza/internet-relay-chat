@@ -2,16 +2,20 @@
 
 Socket::Socket(int port) {
 
-    this->sockfd =  socket(AF_INET, SOCK_STREAM, 0);
+    this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     this->port = port;
 
     if (this->sockfd < 0) 
-        error("ERROR opening socket");
+        Error("ERROR opening socket");
 
     /* clear address structure */
-    bzero((char *) &serv_addr, sizeof(serv_addr));
+    explicit_bzero((char *) &serv_addr, sizeof(serv_addr));
 }
 
+void Socket::Error(const char * msg) {
+	perror(msg);
+	exit(1);
+}
 
 void Socket::Bind(){
 	
@@ -27,25 +31,24 @@ void Socket::Bind(){
 	int status = bind(this->sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
 	if (status == -1){
-		error("Could not bind with the server\n");
+		Error("Could not bind with the server\n");
 		return;
 	}
 }
 
 void Socket::Listen() {
-	listen(this->sock_fd, max_clients);
+	listen(this->sockfd, max_clients);
 }
 
-pair < int, string > Socket::Accept() {
+pair<int,string> Socket::Accept() {
 
-    struct sockaddr_in cli_addr;
-    socklen_t cli_len = sizeof(cli_addr);
+	struct sockaddr_in cli_addr;
+	socklen_t cli_len = sizeof(cli_addr);
 
-	int newsockfd = accept(this->sock_fd, (struct sockaddr *)&cli_addr, &cli_len);
+	int newsockfd = accept(this->sockfd, (struct sockaddr *)&cli_addr, &cli_len);
 
 	if (newsockfd == -1) {
-		error("Server didn't accept\n");
-		return -1;
+		Error("Server didn't accept\n");
 	}
 	
 	return pair<int, string>(newsockfd, inet_ntoa(cli_addr.sin_addr));

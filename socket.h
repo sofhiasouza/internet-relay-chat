@@ -4,29 +4,36 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include <sys/types.h>
 #include <arpa/inet.h>
-#include <netinet.h> 
+#include <netinet/in.h>
+#include <netdb.h>
+
+#include <string>
+
+#define LOCALHOST 8001
 
 using namespace std;
 
 class Socket {
+    private:
+        int port;
+        struct sockaddr_in serv_addr;
 
-private:
-    int port;
-    struct sockaddr_in serv_addr;
+        void Error(const char * msg);
 
-public:
-    int sockfd;
-    static const int max_clients = 64;
+    public:
+        int sockfd;
+        static const int max_clients = 64;
 
-    Socket(int port);
+        Socket(int port);
 
-    void Bind();
+        pair<int, string> Accept();
 
-    void Listen();
+        void Bind();
 
-}
-
+        void Listen();
+};
 
 #endif

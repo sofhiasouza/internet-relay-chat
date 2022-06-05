@@ -1,5 +1,9 @@
 #include "socket.h"
 
+#include <iostream>
+
+using namespace std;
+
 int main(int argc, char* argv[]){
 
     Socket* server = new Socket(8192);
@@ -18,5 +22,4 @@ int main(int argc, char* argv[]){
     while(1){
         
     }
-
 }
