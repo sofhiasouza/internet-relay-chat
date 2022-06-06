@@ -11,18 +11,26 @@
 #include <netdb.h>
 
 #include <string>
+#include <vector>
 
-#define LOCALHOST 8001
+#define LOCALHOST_PORT 8001
+
+#define MAX_BUFFER_SIZE 4097
 
 using namespace std;
 
 class Socket {
     private:
         int port;
+        int serverFd;
+
         struct sockaddr_in serv_addr;
 
-        void Error(const char * msg);
+        char buffer[MAX_BUFFER_SIZE];
 
+        vector<int> connections;
+
+        void Error(const char * msg);
     public:
         int sockfd;
         static const int max_clients = 64;
@@ -33,7 +41,17 @@ class Socket {
 
         void Bind();
 
+        void Broadcast(string message);
+
+        void Connect(char * hostname, int hostPort);
+
+        void Disconnect();
+
         void Listen();
+
+        string Read();
+
+        void Write(string message, int destSocketFd = -1);
 };
 
 #endif

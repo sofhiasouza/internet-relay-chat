@@ -1,12 +1,15 @@
 #include "socket.h"
 
 #include <iostream>
+#include <tuple>
+
+#define SERVER_PORT 8192
 
 using namespace std;
 
 int main(int argc, char* argv[]){
 
-    Socket* server = new Socket(8192);
+    Socket* server = new Socket(SERVER_PORT);
     server->Bind();
 
     cout << "Server Connected :)";
@@ -17,9 +20,7 @@ int main(int argc, char* argv[]){
     int client;
     tie(client, ip) = server->Accept();
 
-    send(client, "Sending from server to client!\n", 31, 0);
+    server->Broadcast("Sending from server to client!\n");
 
-    while(1){
-        
-    }
+    
 }
