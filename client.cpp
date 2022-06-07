@@ -1,11 +1,12 @@
 #include "socket.h"
+#include <pthread.h>
 
 #include <iostream>
 
 using namespace std;
 
 #define SERVER_PORT 8192
-#define SERVER_NAME "0.0.0.0"
+#define SERVER_NAME "127.0.0.1"
 
 Socket* client = new Socket(LOCALHOST_PORT);
 bool quit = false;
@@ -54,7 +55,12 @@ void* receive_thread(void* arg) {
 
 int main(int argc, char* argv[]) {
 
-    client->Connect(SERVER_NAME, SERVER_PORT);
+    char server_name[50];
+    for(int i=0;i<9;i++){
+        server_name[i] = SERVER_NAME[i];
+    }
+
+    client->Connect(server_name, SERVER_PORT);
     
     string message = "";
 
