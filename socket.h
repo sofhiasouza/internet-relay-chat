@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <iostream>
 
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -49,7 +50,7 @@ class Socket {
 
         void Listen();
 
-        string Read();
+        string Read(int connfd);
 
         void Write(string message, int destSocketFd = -1);
 };

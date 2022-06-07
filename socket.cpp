@@ -75,8 +75,16 @@ void Socket::Listen() {
 	listen(this->sockfd, max_clients);
 }
 
-string Socket::Read() {
-	if(read(sockfd, buffer, MAX_BUFFER_SIZE) == -1)
+void Socket::Disconnect() {
+	int status = close(this->sockfd);
+
+	if (status == -1) {
+		Error("Could not disconnect... =(\n");
+	}
+}
+
+string Socket::Read(int connfd) {
+	if(read(connfd, buffer, MAX_BUFFER_SIZE) == -1)
 		Error("Error on reading message");
 
 	string response(buffer);
@@ -85,9 +93,9 @@ string Socket::Read() {
 	return response;
 }
 
-void Socket::Write(string message, int destSockedFd = -1) {
+void Socket::Write(string message, int destSockedFd) {
 	if(destSockedFd == -1)
 		destSockedFd = sockfd;
 
-	write(sockfd, message.c_str(), message.size());
+	write(destSockedFd, message.c_str(), message.size());
 }
