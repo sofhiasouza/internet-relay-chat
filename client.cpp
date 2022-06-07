@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#define SERVER_PORT 8192
+#define SERVER_PORT 8193
 
 char SERVER_NAME[] = "127.0.0.1";
 
@@ -18,36 +18,28 @@ void* send_thread(void* arg) {
     string message = "";    
 
     while (!quit) {
-        cout << "To Server: ";
         getline(cin, message, '\n');
 
-        if (message == "/quit") {
+        if (message == "/quit")
             quit = true;
-        } else {
-            for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
-                client->Write(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
-            }
+
+        for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
+            client->Write(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
         }
 
         message = "";
     }
-    cout << "Saiu da thread send\n";
     pthread_exit(NULL);
 }
 
-void* receive_thread(void* arg) {   
-    cout << "Comecando received thread" << endl; 
+void* receive_thread(void* arg) {
     int failed = 0;
-    // int sender = *(int*) arg;
-
-    cout << "Deu bom ate aqui" << endl;
 
     while (!quit) {
         string message = client->Read(client->sockfd);
-        cout << "From server: " << message;
+        cout << "From server: " << message << endl;
         message = "";
     }
-    cout << "Saiu da thread receive" << endl;
     pthread_exit(NULL);
 }
 
@@ -102,11 +94,12 @@ int main(int argc, char* argv[]) {
 
     pthread_attr_destroy(&thread_attr);
 
-    if(!pthread_join(tid_send, &status)) {
+    if(pthread_join(tid_send, &status)) {
         cout << "Failed to join send thread" << endl;
         exit(1);
     }
-    if(!pthread_join(tid_receive, &status)) {
+    pthread_cancel(tid_receive);
+    if(pthread_join(tid_receive, &status)) {
         cout << "Failed to join receive thread" << endl;
         exit(1);
     }

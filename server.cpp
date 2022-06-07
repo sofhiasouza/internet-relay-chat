@@ -4,7 +4,7 @@
 #include <tuple>
 #include <algorithm>
 
-#define SERVER_PORT 8192
+#define SERVER_PORT 8193
 
 using namespace std;
 
@@ -38,12 +38,13 @@ int main(int argc, char* argv[]){
         cout << message << endl;
 
         if (message == "/quit") {
-            cout << "Client left the server" << "\n";
+            cout << "Client left the server" << endl;
             quit = true;
+            server->Disconnect(client);
         } else {
             partitionateMessage(server, message);
         }
         message = "";
     }
-    cout << "saiu\n";
+    server->Disconnect();
 }

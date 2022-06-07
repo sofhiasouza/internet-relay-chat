@@ -12,7 +12,7 @@
 #include <netdb.h>
 
 #include <string>
-#include <vector>
+#include <set>
 
 #define LOCALHOST_PORT 8001
 
@@ -29,7 +29,7 @@ class Socket {
 
         char buffer[MAX_BUFFER_SIZE];
 
-        vector<int> connections;
+        set<int> connections;
 
         void Error(const char * msg);
     public:
@@ -47,6 +47,8 @@ class Socket {
         void Connect(char * hostname, int hostPort);
 
         void Disconnect();
+
+        void Disconnect(int clientfd);
 
         void Listen();
 

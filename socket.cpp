@@ -27,7 +27,7 @@ pair<int,string> Socket::Accept() {
 		Error("Server didn't accept\n");
 	}
 
-	connections.push_back(newsockfd);
+	connections.insert(newsockfd);
 	
 	return pair<int, string>(newsockfd, inet_ntoa(cli_addr.sin_addr));
 }
@@ -81,6 +81,15 @@ void Socket::Disconnect() {
 	if (status == -1) {
 		Error("Could not disconnect... =(\n");
 	}
+}
+
+void Socket::Disconnect(int clientfd) {
+	int status = close(clientfd);
+	if (status == -1) {
+		Error("Could not disconnect... =(\n");
+	}
+
+	connections.erase(clientfd);
 }
 
 string Socket::Read(int connfd) {
