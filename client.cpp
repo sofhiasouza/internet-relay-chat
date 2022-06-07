@@ -6,9 +6,10 @@
 using namespace std;
 
 #define SERVER_PORT 8192
-#define SERVER_NAME "127.0.0.1"
 
-Socket* client = new Socket(LOCALHOST_PORT);
+char SERVER_NAME[] = "127.0.0.1";
+
+Socket* client;
 bool quit = false;
 
 void* send_thread(void* arg) {    
@@ -17,17 +18,11 @@ void* send_thread(void* arg) {
     string message = "";    
 
     while (!quit) {
-        do {
-            cout << "To Server: ";
-            getline(cin, message, '\n');
-        } while (message.size() == 0); 
-
-        cout << message << endl;
+        cout << "To Server: ";
+        getline(cin, message, '\n');
 
         if (message == "/quit") {
-            cout << "Client left the server" << "\n";
             quit = true;
-
         } else {
             for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
                 client->Write(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
@@ -36,31 +31,29 @@ void* send_thread(void* arg) {
 
         message = "";
     }
-    cout << "saiu\n";
+    cout << "Saiu da thread send\n";
     pthread_exit(NULL);
 }
 
-void* receive_thread(void* arg) {    
+void* receive_thread(void* arg) {   
+    cout << "Comecando received thread" << endl; 
     int failed = 0;
-    int sender = *((int*)arg);
+    // int sender = *(int*) arg;
+
+    cout << "Deu bom ate aqui" << endl;
 
     while (!quit) {
         string message = client->Read(client->sockfd);
-        cout << message << endl;
+        cout << "From server: " << message;
         message = "";
     }
-    cout << "saiu\n";
+    cout << "Saiu da thread receive" << endl;
     pthread_exit(NULL);
 }
 
 int main(int argc, char* argv[]) {
-
-    char server_name[50];
-    for(int i=0;i<9;i++){
-        server_name[i] = SERVER_NAME[i];
-    }
-
-    client->Connect(server_name, SERVER_PORT);
+    client = new Socket(LOCALHOST_PORT);
+    client->Connect(SERVER_NAME, SERVER_PORT);
     
     string message = "";
 
@@ -92,17 +85,35 @@ int main(int argc, char* argv[]) {
     // }
 
     pthread_t tid_send, tid_receive;
+    pthread_attr_t thread_attr;
+    void * status;
 
-    if (pthread_create(&tid_send, NULL, send_thread, NULL) != 0) {
+    pthread_attr_init(&thread_attr);
+    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
+
+    if (pthread_create(&tid_send, &thread_attr, send_thread, NULL) != 0) {
         cout << "Failed to create thread to send message" << endl;
         return 1;
     }
-    if (pthread_create(&tid_receive, NULL, receive_thread, NULL) != 0) {
+    if (pthread_create(&tid_receive, &thread_attr, receive_thread, NULL) != 0) {
         cout << "Failed to create thread to receive message" << endl;
         return 1;
     }
 
+    pthread_attr_destroy(&thread_attr);
+
+    if(!pthread_join(tid_send, &status)) {
+        cout << "Failed to join send thread" << endl;
+        exit(1);
+    }
+    if(!pthread_join(tid_receive, &status)) {
+        cout << "Failed to join receive thread" << endl;
+        exit(1);
+    }
+
     client->Disconnect();
+
+    cout << "Client has disconnected from the server" << endl;
     
     delete client;
     return 0;

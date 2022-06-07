@@ -10,6 +10,11 @@ using namespace std;
 
 Socket* server = new Socket(SERVER_PORT);
 
+void partitionateMessage(Socket * server, string message) {
+    for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
+        server->Broadcast(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
+    }
+}
 
 int main(int argc, char* argv[]){
 
@@ -29,18 +34,14 @@ int main(int argc, char* argv[]){
     bool quit = false;
 
     while (!quit) {
-        cout << "aqui\n";
         string message = server->Read(client);
         cout << message << endl;
 
         if (message == "/quit") {
             cout << "Client left the server" << "\n";
             quit = true;
-
         } else {
-            for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
-                server->Broadcast(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
-            }
+            partitionateMessage(server, message);
         }
         message = "";
     }
