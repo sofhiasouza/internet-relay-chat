@@ -34,11 +34,15 @@ void* send_thread(void* arg) {
 
 void* receive_thread(void* arg) {
     int failed = 0;
+    string message = "";
 
     while (!quit) {
-        string message = client->Read(client->sockfd);
-        cout << "From server: " << message << endl;
-        message = "";
+        do {
+            message = client->Read(client->sockfd);
+            cout << message  << endl;
+
+            message = "";
+        } while(message.size() ==  MAX_BUFFER_SIZE-1 && !quit);
     }
     pthread_exit(NULL);
 }

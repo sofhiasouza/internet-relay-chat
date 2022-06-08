@@ -9,11 +9,42 @@
 using namespace std;
 
 Socket* server = new Socket(SERVER_PORT);
+int number_of_clients = 0;
 
 void partitionateMessage(Socket * server, string message) {
     for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
         server->Broadcast(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
     }
+}
+
+void *read_thread(void* arg){
+    int failed = 0;
+    bool quit = false;
+    int client = *((int*)arg);
+    int client_id = ++number_of_clients;
+
+    string message = "client#" + to_string(client_id) + " connected to the server";
+    cout << message << endl;
+    partitionateMessage(server, message);
+
+    while (!quit) {
+        string original_message = server->Read(client);
+        message = "client#" + to_string(client_id) + ":" + original_message;
+        cout << message << endl;
+
+        if (original_message == "/quit") {
+            message = "client#" + to_string(client_id) + " left the server";
+            cout << message << endl;
+            partitionateMessage(server, message);
+
+            quit = true;
+            server->Disconnect(client);
+        } else {
+            partitionateMessage(server, message);
+        }
+        message = "";
+    }
+    pthread_exit(NULL);
 }
 
 int main(int argc, char* argv[]){
@@ -22,29 +53,25 @@ int main(int argc, char* argv[]){
 
     cout << "Server Connected :)\n";
 
-    server->Listen();
+    while(1) {
+        server->Listen();
 
-    string ip;
-    int client;
-    tie(client, ip) = server->Accept();
+        string ip;
+        int client;
+        tie(client, ip) = server->Accept();
 
-    server->Broadcast("Sending from server to client!\n");
+        server->Write("You are connected!\n", client);
 
-    int failed = 0;
-    bool quit = false;
+        pthread_t tid;
+        pthread_attr_t thread_attr;
+    
+        pthread_attr_init(&thread_attr);
+        pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
 
-    while (!quit) {
-        string message = server->Read(client);
-        cout << message << endl;
-
-        if (message == "/quit") {
-            cout << "Client left the server" << endl;
-            quit = true;
-            server->Disconnect(client);
-        } else {
-            partitionateMessage(server, message);
+        if (pthread_create(&tid, &thread_attr, read_thread, &client) != 0) {
+            cout << "Failed to create thread to send message" << endl;
         }
-        message = "";
     }
+
     server->Disconnect();
 }
