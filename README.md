@@ -21,11 +21,9 @@ Comandos do make file:
 - make compile_all: compila todos os arquivos, gerando executáveis para o cliente e para o servidor
 - make compile_client: compila os arquivos relacionados ao cliente
 - make compile_server: compila os arquivos relacionados ao servidor
-- make run_client: executa o cliente
 - make run_server: executa o servidor
-- make deploy_client: compila e executa o cliente
 - make deploy_server: compila e executa o servidor
 - make clear_client: apaga o executável do cliente
 - make clear_server: apaga o executável do servidor
 
-Para utilizar o sistema deve-se executar primeiro o servidor e depois o cliente.
+Para utilizar o sistema deve-se executar primeiro o servidor. Depois o cliente, com o comando ./client ip_address, substituindo ip_address pelo IP do servidor ao qual se deseja conectar.

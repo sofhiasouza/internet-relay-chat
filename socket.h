@@ -24,6 +24,7 @@ class Socket {
     private:
         int port;
         int serverFd;
+        string ip;
 
         struct sockaddr_in serv_addr;
 
@@ -36,7 +37,7 @@ class Socket {
         int sockfd;
         static const int max_clients = 64;
 
-        Socket(int port);
+        Socket(string ip, int port);
 
         pair<int, string> Accept();
 
@@ -44,7 +45,7 @@ class Socket {
 
         void Broadcast(string message);
 
-        void Connect(char * hostname, int hostPort);
+        void Connect(int hostPort);
 
         void Disconnect();
 

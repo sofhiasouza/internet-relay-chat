@@ -8,17 +8,9 @@ compile_client:
 compile_server:
 	g++ socket.cpp server.cpp -o server -pthread
 
-run_client:
-	./client
-	@make -s clear_client
-
 run_server:
 	./server
 	@make -s clear_server
-	
-deploy_client:
-	@make -s compile_client
-	@make -s run_client
 
 deploy_server:
 	@make -s compile_server

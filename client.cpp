@@ -7,8 +7,6 @@ using namespace std;
 
 #define SERVER_PORT 8193
 
-char SERVER_NAME[] = "127.0.0.1";
-
 Socket* client;
 bool quit = false;
 
@@ -48,9 +46,17 @@ void* receive_thread(void* arg) {
 }
 
 int main(int argc, char* argv[]) {
-    client = new Socket(LOCALHOST_PORT);
-    client->Connect(SERVER_NAME, SERVER_PORT);
     
+    if (argc < 2) {
+        cout << "Provide your ip, please\n";
+        return 1; 
+    }
+
+    string ip = argv[1];
+    
+    client = new Socket(ip, LOCALHOST_PORT);
+    client->Connect(SERVER_PORT);
+
     string message = "";
 
     pthread_t tid_send, tid_receive;

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Socket* server = new Socket(SERVER_PORT);
+Socket* server = new Socket("0.0.0.0", SERVER_PORT);
 int number_of_clients = 0;
 
 void partitionateMessage(Socket * server, string message) {
