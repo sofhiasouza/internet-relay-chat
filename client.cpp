@@ -53,33 +53,6 @@ int main(int argc, char* argv[]) {
     
     string message = "";
 
-    // while (message != "/quit") {
-
-    //     /* Garante que todas as mensagens enviadas serão recebidas */        
-    //     // do {
-    //     message = socket->Read();
-
-    //     cout << "From server: " << message << "\n";
-    //     // } while (message.size() == Socket::buffer_size);
-
-    //     // if (message.size() == 0) break;        
-
-    //     /* Espera o usuário digitar uma mensagem válida para enviar */
-    //     // do {
-    //         cout << "To Server: ";
-    //         getline(cin, message, '\n');
-    //     // } while (message.size() == 0); 
-
-
-    //     if (message == "/quit") break;
-
-    //     /*Divide mensagens com mais de "buffer_size" caracteres e as envia em sequência*/
-    //     // for (int i = 0; (unsigned int)i < message.size(); i += Socket::buffer_size) {
-    //     socket->Write(message);
-    //         // socket->Check();
-    //     // }
-    // }
-
     pthread_t tid_send, tid_receive;
     pthread_attr_t thread_attr;
     void * status;
@@ -87,10 +60,13 @@ int main(int argc, char* argv[]) {
     pthread_attr_init(&thread_attr);
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
 
+    //Create thread to watch messages sent by this client
     if (pthread_create(&tid_send, &thread_attr, send_thread, NULL) != 0) {
         cout << "Failed to create thread to send message" << endl;
         return 1;
     }
+
+    //Create thread to watch messages received by this client
     if (pthread_create(&tid_receive, &thread_attr, receive_thread, NULL) != 0) {
         cout << "Failed to create thread to receive message" << endl;
         return 1;

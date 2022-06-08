@@ -68,6 +68,7 @@ int main(int argc, char* argv[]){
         pthread_attr_init(&thread_attr);
         pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
 
+        // Create thread to read messages from this new client
         if (pthread_create(&tid, &thread_attr, read_thread, &client) != 0) {
             cout << "Failed to create thread to send message" << endl;
         }
