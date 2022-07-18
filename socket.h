@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
+#include <map>
 
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -12,7 +13,7 @@
 #include <netdb.h>
 
 #include <string>
-#include <vector>
+#include <set>
 
 #define LOCALHOST_PORT 8001
 
@@ -24,19 +25,21 @@ class Socket {
     private:
         int port;
         int serverFd;
+        string ip;
+        //string name;
 
         struct sockaddr_in serv_addr;
 
         char buffer[MAX_BUFFER_SIZE];
 
-        vector<int> connections;
+        set<int> connections;
 
         void Error(const char * msg);
     public:
         int sockfd;
         static const int max_clients = 64;
 
-        Socket(int port);
+        Socket(string ip, int port);
 
         pair<int, string> Accept();
 
@@ -44,9 +47,11 @@ class Socket {
 
         void Broadcast(string message);
 
-        void Connect(char * hostname, int hostPort);
+        void Connect(int hostPort);
 
         void Disconnect();
+
+        void Disconnect(int clientfd);
 
         void Listen();
 
