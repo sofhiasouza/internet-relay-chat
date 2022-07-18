@@ -70,48 +70,6 @@ void* receive_thread(void* arg) {
     pthread_exit(NULL);
 }
 
-/*
-bool valid_nickname(string nickname){
-
-    if(nickname.size()<3) return false;
-    if(nickname == "server") return false;
-
-    for(int i=0;i<nickname.size();i++){
-        bool test = false;
-
-        if(nickname[i] >= 'a' and nickname[i] <= 'z')
-            test = true;
-        else if(nickname[i] >= 'A' and nickname[i] <= 'Z')
-            test = true;
-        else if(nickname[i]=='.' or nickname[i]=='-' or nickname[i]=='_' )
-            test = true;
-
-        if(!test) return false; 
-    } 
-
-    return true;
-}
-string nickname(){
-    string user_nickname = "";
-    cout << "Choose your nickname: ";
-
-    if(getline(cin, user_nickname)){
-        while(!valid_nickname(user_nickname)){
-            cout << "Nickname is not valid, please try again: ";
-
-            if(!getline(cin, user_nickname)){
-                exit(0);
-            }
-        }
-    }
-    else{
-        exit(0);
-    }
-
-    return user_nickname;
-}
-*/
-
 int main(int argc, char* argv[]) {
 
     signal(SIGINT, Sigint_handler);
@@ -123,12 +81,9 @@ int main(int argc, char* argv[]) {
 
     string ip = argv[1];
     
-    //Alteração
     string command = "";
 
-    //string nick = nickname(); 
-
-    cout << "Conecte-se ao servidor digitando /connect.\n";
+    cout << "Join server by typing /connect.\n";
 
     while(command != "/connect"){
         if(!getline(cin, command, '\n')) {
