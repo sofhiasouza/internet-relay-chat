@@ -27,3 +27,7 @@ Comandos do make file:
 - make clear_server: apaga o executável do servidor
 
 Para utilizar o sistema deve-se executar primeiro o servidor. Depois o cliente, com o comando ./client ip_address, substituindo ip_address pelo IP do servidor ao qual se deseja conectar.
+
+##Link para o vídeo
+Drive: https://drive.google.com/file/d/1FcdKcc32PPA_PBpC0_nwV6lWJUMkq4tr/view?usp=sharing
+Youtube: https://www.youtube.com/watch?v=Ct4MjJvff-E
