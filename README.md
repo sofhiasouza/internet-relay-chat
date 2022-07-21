@@ -3,7 +3,7 @@
 ## Membros
 
 - Gildo Gutemberg Alves Oliveira - 11832732
-- Otto Cruz Fernandes - Otto Cruz Fernandes
+- Otto Cruz Fernandes - 11275130
 - Sofhia de Souza Gonçalves - 11735035
 
 ## Sistema Operacional

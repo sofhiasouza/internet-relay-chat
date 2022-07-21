@@ -90,8 +90,8 @@ void Socket::Disconnect(int clientfd) {
 	connections.erase(clientfd);
 }
 
-string Socket::Read(int connfd) {
-	if(read(connfd, buffer, MAX_BUFFER_SIZE) == -1)
+string Socket::Read(int connfd, int bufferSize /*= MAX_BUFFER_SIZE */) {
+	if(read(connfd, buffer, bufferSize) == -1)
 		Error("Error on reading message");
 
 	string response(buffer);

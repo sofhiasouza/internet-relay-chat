@@ -3,7 +3,7 @@
 #include <iostream>
 #include <tuple>
 #include <algorithm>
-#include<vector>
+#include <vector>
 #include <pthread.h>
 
 #define SERVER_PORT 8193
@@ -18,6 +18,7 @@ class Clients{
 
 public:
     int id;
+    int bufferSize;
     string nick;
     string ip;
     bool is_channel = false;
@@ -38,6 +39,7 @@ int find_client(string nickname){
     return -1;
 
 }
+
 Socket* server = new Socket("0.0.0.0", SERVER_PORT);
 int number_of_clients = 0;
 
@@ -54,22 +56,16 @@ void partitionateMessageCh(Socket * server, string message, int pos) {
 
     if(!v_clients[pos].is_channel){
         server->Write("Please, join a channel first", v_clients[pos].id);
-    }
-
-    else{
-
+    } else {
         for(int j=0;j<v_clients.size();j++){
             if(v_clients[j].channel_name == v_clients[pos].channel_name){
-                for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
-                    server->Write(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)),v_clients[j].id);
-                }
+                server->Write(message,v_clients[j].id);
             }
         }
     }
 
     pthread_mutex_unlock(&lock);
 }
-
 
 bool valid_ch_name(string ch_name){
     
@@ -81,7 +77,6 @@ bool valid_ch_name(string ch_name){
     } 
     return true;
 }
-
 
 bool valid_nickname(string nickname){
 
@@ -112,22 +107,18 @@ void *read_thread(void* arg){
     int client = *((int*)arg);
     int client_id = ++number_of_clients;
     int pos = client_id-1;
-    string name = v_clients[client_id-1].nick;
+    string name = v_clients[pos].nick;
+    int bufferSize = v_clients[pos].bufferSize;
 
-    //string message = "client#" + to_string(client_id) + " connected to the server";
     string message = "client " + name + " connected to the server";
-    cout << message << endl;
     partitionateMessage(server, message);
 
     while (!quit) {
-        name = v_clients[client_id-1].nick;
-        string original_message = server->Read(client);
-        //message = "client#" + to_string(client_id) + ":" + original_message;
-        message = "client " + name + ":" + original_message;
+        string original_message = server->Read(client, bufferSize);
+        message = "client " + name + ": " + original_message;
         cout << message << endl;
 
         if (original_message == "/quit") {
-            //message = "client#" + to_string(client_id) + " left the server";
             message = "client " + name + " left the server";
             cout << message << endl;
             partitionateMessage(server, message);
@@ -305,7 +296,7 @@ void *read_thread(void* arg){
     pthread_exit(NULL);
 }
 
-string choose_nickname(int client){
+pair<string, int> choose_nickname(int client){
     
     string message = "Choose your nickname: ";
     server->Write(message,client);
@@ -317,8 +308,14 @@ string choose_nickname(int client){
 
         user_nickname = server->Read(client);
     }
+    message = "";
 
-    return user_nickname;
+    int clientBufferSize = MAX_BUFFER_SIZE - ("client " + user_nickname + ": ").size();
+    message = "/max_size - " + to_string(clientBufferSize);
+    server->Write(message, client);
+    cout << "message = " << message << endl;
+
+    return pair<string, int>(user_nickname, clientBufferSize);
 }
 
 int main(int argc, char* argv[]){
@@ -336,13 +333,16 @@ int main(int argc, char* argv[]){
         server->Write("You are connected!\n", client);
 
         //string nickname = server->Read(client);
-        string nickname =  choose_nickname(client);
+        string nickname;
+        int clientBufferSize;
+        tie(nickname, clientBufferSize) = choose_nickname(client);
 
         pthread_mutex_lock(&lock);
         Clients aux;
         aux.ip = ip;
         aux.nick = nickname;
         aux.id = client;
+        aux.bufferSize = clientBufferSize;
         v_clients.push_back(aux);
         pthread_mutex_unlock(&lock);
 
@@ -361,6 +361,6 @@ int main(int argc, char* argv[]){
             cout << "Failed to create thread to send message" << endl;
         }
     }
-
+    
     server->Disconnect();
 }

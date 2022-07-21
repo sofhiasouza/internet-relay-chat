@@ -17,7 +17,7 @@
 
 #define LOCALHOST_PORT 8001
 
-#define MAX_BUFFER_SIZE 4097
+#define MAX_BUFFER_SIZE 4096
 
 using namespace std;
 
@@ -55,7 +55,7 @@ class Socket {
 
         void Listen();
 
-        string Read(int connfd);
+        string Read(int connfd, int bufferSize = MAX_BUFFER_SIZE);
 
         void Write(string message, int destSocketFd = -1);
 };

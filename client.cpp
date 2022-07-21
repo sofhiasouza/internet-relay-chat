@@ -1,6 +1,6 @@
 #include "socket.h"
 #include <pthread.h>
-#include<csignal>
+#include <csignal>
 //#include<stdio.h>
 
 #include <iostream>
@@ -9,9 +9,10 @@ using namespace std;
 
 #define SERVER_PORT 8193
 
-
 Socket* client;
 bool quit = false;
+
+int buffer_size = -1;
 
 void Sigint_handler(int sig_num) {
     signal(SIGINT, Sigint_handler);
@@ -25,16 +26,19 @@ void* send_thread(void* arg) {
     string message = "";    
 
     while (!quit) {
-        //getline(cin, message, '\n');
-
         if(getline(cin, message, '\n')){
 
 
             if (message == "/quit")
                 quit = true;
 
-            for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
-                client->Write(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
+            if(buffer_size == -1) {
+                client->Write(message);
+            } else {
+                for(int i = 0 ; i < message.size() ; i += buffer_size){
+                    string submessage = message.substr(i, buffer_size);
+                    client->Write(submessage);
+                }
             }
 
             message = "";
@@ -43,9 +47,7 @@ void* send_thread(void* arg) {
             quit = true;
             message = "/quit";
 
-            for(int i = 0 ; i < message.size() ; i += MAX_BUFFER_SIZE-1){
-                client->Write(message.substr(i, min(MAX_BUFFER_SIZE-1, (int)message.size()-i+1)));
-            }
+            client->Write(message);
 
             message = "";
         }
@@ -62,11 +64,17 @@ void* receive_thread(void* arg) {
     while (!quit) {
         do {
             message = client->Read(client->sockfd);
-            cout << message  << endl;
+            
+            if(message.size() > 12 && message.substr(0, 12) == "/max_size - ") {
+                buffer_size = stoi(message.substr(12));
+            } else {
+                cout << message  << endl;
+            }
 
             message = "";
-        } while(message.size() ==  MAX_BUFFER_SIZE-1 && !quit);
+        } while(!quit);
     }
+
     pthread_exit(NULL);
 }
 
