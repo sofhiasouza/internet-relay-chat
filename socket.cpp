@@ -1,8 +1,10 @@
 #include "socket.h"
 
-Socket::Socket(int port) {
+Socket::Socket(string ip, int port) {
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     this->port = port;
+	this->ip = ip;
+	//this->name = name;
 
     if (this->sockfd < 0) 
         Error("ERROR opening socket");
@@ -12,7 +14,7 @@ Socket::Socket(int port) {
 }
 
 void Socket::Error(const char * msg) {
-	perror(msg);
+	perror(msg);	
 	exit(1);
 }
 
@@ -27,7 +29,7 @@ pair<int,string> Socket::Accept() {
 		Error("Server didn't accept\n");
 	}
 
-	connections.push_back(newsockfd);
+	connections.insert(newsockfd);
 	
 	return pair<int, string>(newsockfd, inet_ntoa(cli_addr.sin_addr));
 }
@@ -55,16 +57,12 @@ void Socket::Broadcast(string message) {
 	}
 }
 
-void Socket::Connect(char * hostname, int hostPort) {
-	struct hostent * server = gethostbyname(hostname);
+void Socket::Connect(int hostPort) {
 
-	if(server == NULL)
-		Error("No such host\n");
-
-	explicit_bzero((char *) &serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
+	
+	serv_addr.sin_addr.s_addr = inet_addr((this->ip).c_str());
 
-	bcopy((char *) server->h_addr, (char *) &serv_addr.sin_addr.s_addr, server->h_length);
 	serv_addr.sin_port = htons(hostPort);
 
 	if(connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
@@ -83,8 +81,17 @@ void Socket::Disconnect() {
 	}
 }
 
-string Socket::Read(int connfd) {
-	if(read(connfd, buffer, MAX_BUFFER_SIZE) == -1)
+void Socket::Disconnect(int clientfd) {
+	int status = close(clientfd);
+	if (status == -1) {
+		Error("Could not disconnect... =(\n");
+	}
+
+	connections.erase(clientfd);
+}
+
+string Socket::Read(int connfd, int bufferSize /*= MAX_BUFFER_SIZE */) {
+	if(read(connfd, buffer, bufferSize) == -1)
 		Error("Error on reading message");
 
 	string response(buffer);
